@@ -1,0 +1,226 @@
+openapi: 3.0.0
+info:
+  title: Soccer Competition Administration API
+  version: 1.0.0
+
+servers:
+  - url: https://api.footballcomp.com
+
+paths:
+  /competitions:
+    get:
+      summary: Retrieve all competitions
+      description: Fetches a paginated list of football competitions, including details about where they are held.
+      parameters:
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Page number to retrieve
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Number of items per page
+      responses:
+        '200':
+          description: Successfully retrieved the list of competitions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetitionList'
+    post:
+      summary: Add a new competition
+      description: Creates a new competition in the system, specifying its name and location.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Competition'
+      responses:
+        '201':
+          description: Competition successfully created
+
+  /teams:
+    get:
+      summary: Retrieve all teams
+      description: Returns a paginated list of football teams, with the ability to filter by team name.
+      parameters:
+        - name: teamName
+          in: query
+          schema:
+            type: string
+          description: Filter teams based on their name
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Page number to retrieve
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Number of items per page
+      responses:
+        '200':
+          description: Successfully retrieved the list of teams
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamList'
+    post:
+      summary: Register a new team
+      description: Registers a new football team by specifying its name and slogan.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Team'
+      responses:
+        '201':
+          description: Team successfully registered
+
+  /teams/{teamId}:
+    get:
+      summary: Get detailed information about a team
+      description: Retrieves detailed information about a specific team, including its slogan, competitions, and players.
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the team
+      responses:
+        '200':
+          description: Successfully retrieved the team details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamDetails'
+
+  /teams/{teamId}/players:
+    get:
+      summary: Retrieve players in a team
+      description: Fetches a paginated list of players belonging to a specific team, with optional filtering by player name.
+      parameters:
+        - name: playerName
+          in: query
+          schema:
+            type: string
+          description: Filter players based on their name
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Page number to retrieve
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Number of items per page
+      responses:
+        '200':
+          description: Successfully retrieved the list of players
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerList'
+    post:
+      summary: Add players to a team
+      description: Associates a list of players with a specific team by their IDs.
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Player'
+      responses:
+        '201':
+          description: Players successfully added to the team
+
+components:
+  schemas:
+    Competition:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the competition
+        location:
+          type: string
+          description: The country or continent where the competition takes place
+
+    CompetitionList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Competition'
+
+    Team:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the team
+        slogan:
+          type: string
+          description: The team's slogan or motto
+
+    TeamList:
+      type: array
+      items:
+        $ref: '#/components/schemas/TeamDetails'
+
+    TeamDetails:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the team
+        slogan:
+          type: string
+          description: The team's slogan or motto
+        competitions:
+          type: array
+          items:
+            type: string
+          description: A list of competitions the team participates in
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/Player'
+          description: A list of players in the team
+
+    Player:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The player's name
+        number:
+          type: integer
+          description: The player's jersey number
+        strongFoot:
+          type: string
+          enum: [Gauche, Droite]
+          description: The player's dominant foot
+
+    PlayerList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Player'
